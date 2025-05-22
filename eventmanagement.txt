@@ -1,0 +1,299 @@
+package event;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+public class EventManagementGUI extends JFrame {
+    private CardLayout cardLayout = new CardLayout();
+    private JPanel mainPanel = new JPanel(cardLayout);
+
+    private JTextField nameField = new JTextField();
+    private JTextField phoneField = new JTextField();
+    private JTextField emailField = new JTextField();
+    private JTextField dateField = new JTextField();
+
+    private JComboBox<String> themeBox;
+    private JTextField vegCountField = new JTextField();
+    private JTextField nonVegCountField = new JTextField();
+    private JComboBox<String> photoBox;
+
+    private String selectedThemeName;
+    private String[] selectedThemeItems;
+    private int decorationHours;
+    private int vegCount;
+    private int nonVegCount;
+    private int photographerCost;
+    private int decorationCost;
+
+    private String eventDate;
+
+    public EventManagementGUI() {
+        setTitle("Event Management System");
+        setSize(500, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        mainPanel.add(createBookingPanel(), "Booking");
+        mainPanel.add(createThemePanel(), "Theme");
+        mainPanel.add(createCateringPanel(), "Catering");
+        mainPanel.add(createPhotographyPanel(), "Photography");
+        mainPanel.add(createSummaryPanel(), "Summary");
+
+        add(mainPanel);
+        setVisible(true);
+    }
+
+    private JPanel createBookingPanel() {
+        JPanel panel = new JPanel(new GridLayout(5, 2, 10, 10));
+        panel.setBorder(BorderFactory.createTitledBorder("Booking Details"));
+
+        panel.add(new JLabel("Name:"));
+        panel.add(nameField);
+        panel.add(new JLabel("Phone (10 digits):"));
+        panel.add(phoneField);
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+        panel.add(new JLabel("Event Date (DD-MM-YYYY):"));
+        panel.add(dateField);
+
+        JButton next = new JButton("Next →");
+        next.addActionListener(e -> {
+            if (validateBooking()) cardLayout.show(mainPanel, "Theme");
+        });
+        panel.add(new JLabel());
+        panel.add(next);
+
+        return panel;
+    }
+
+    private JPanel createThemePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        String[] themes = {
+                "Birthday Functions (Flowers, Lights, Centerpieces, Backdrops)",
+                "Marriage (Balloons, Lights, Candles, Fabric Rolls)",
+                "Engagement (Flowers, Drapes, Stage Setup, Centerpieces)",
+                "Business Meetings (Flowers, Balloons, Candles, Backdrops)"
+        };
+        String[][] items = {
+                {"50 Flowers", "10 Lights", "5 Table Centerpieces", "2 Backdrops"},
+                {"20 Balloons", "15 Lights", "10 Candles", "5 Fabric Rolls"},
+                {"30 Flowers", "10 Drapes", "3 Stage Setup", "8 Table Centerpieces"},
+                {"40 Flowers", "20 Balloons", "15 Candles", "4 Backdrops"}
+        };
+
+        themeBox = new JComboBox<>(themes);
+        JTextField hoursField = new JTextField();
+
+        JButton next = new JButton("Next →");
+        next.addActionListener(e -> {
+            int index = themeBox.getSelectedIndex();
+            selectedThemeName = themes[index];
+            selectedThemeItems = items[index];
+            try {
+                decorationHours = Integer.parseInt(hoursField.getText());
+                decorationCost = decorationHours * 500;
+                cardLayout.show(mainPanel, "Catering");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Please enter valid hours.");
+            }
+        });
+
+        JPanel form = new JPanel(new GridLayout(3, 2, 10, 10));
+        form.add(new JLabel("Select Theme:"));
+        form.add(themeBox);
+        form.add(new JLabel("Decoration Setup Hours:"));
+        form.add(hoursField);
+        form.add(new JLabel());
+        form.add(next);
+
+        panel.add(form, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel createCateringPanel() {
+        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
+        panel.setBorder(BorderFactory.createTitledBorder("Catering"));
+
+        JLabel vegItemsLabel = new JLabel("Veg Menu: Paneer Tikka, Veg Biryani, Dal");
+        vegItemsLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        panel.add(new JLabel("Vegetarian Persons (₹500):"));
+        panel.add(vegCountField);
+        panel.add(vegItemsLabel);
+        panel.add(new JLabel());
+
+        JLabel nonVegItemsLabel = new JLabel("Non-Veg Menu: Chicken Curry, Fish Fry, Mutton");
+        nonVegItemsLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        panel.add(new JLabel("Non-Vegetarian Persons (₹800):"));
+        panel.add(nonVegCountField);
+        panel.add(nonVegItemsLabel);
+        panel.add(new JLabel());
+
+        JButton next = new JButton("Next →");
+        next.addActionListener(e -> {
+            try {
+                vegCount = Integer.parseInt(vegCountField.getText());
+                nonVegCount = Integer.parseInt(nonVegCountField.getText());
+                cardLayout.show(mainPanel, "Photography");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Enter valid numbers.");
+            }
+        });
+        panel.add(new JLabel());
+        panel.add(next);
+
+        return panel;
+    }
+
+    private JPanel createPhotographyPanel() {
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(BorderFactory.createTitledBorder("Photography"));
+
+        String[] options = {"Basic - ₹3000", "Standard - ₹6000", "Premium - ₹9000"};
+        photoBox = new JComboBox<>(options);
+
+        JButton next = new JButton("Finish & Show Summary");
+        next.addActionListener(e -> {
+            int choice = photoBox.getSelectedIndex();
+            photographerCost = (choice + 1) * 3000;
+            cardLayout.show(mainPanel, "Summary");
+        });
+
+        panel.add(new JLabel("Choose Package:"));
+        panel.add(photoBox);
+        panel.add(new JLabel());
+        panel.add(next);
+
+        return panel;
+    }
+
+    private JPanel createSummaryPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        JTextArea area = new JTextArea();
+        area.setEditable(false);
+        area.setFont(new Font("Monospaced", Font.BOLD, 14));
+        area.setAlignmentX(Component.CENTER_ALIGNMENT);
+        area.setAlignmentY(Component.CENTER_ALIGNMENT);
+
+        JButton finish = new JButton("Show Summary & Save");
+
+        finish.addActionListener(e -> {
+            int vendorCost = calculateVendorCost(selectedThemeItems);
+            int foodCost = (vegCount * 500) + (nonVegCount * 800);
+            int employeeCost = decorationCost + foodCost + photographerCost;
+            int totalCost = vendorCost + employeeCost;
+
+            StringBuilder summary = new StringBuilder();
+            summary.append("          ---- Budget Summary ----\n");
+            summary.append("          📅 Event Date: ").append(eventDate).append("\n");
+            summary.append("          🎉 Event Type: ").append(selectedThemeName).append("\n");
+            summary.append("\n");
+            summary.append("          Vendor Decoration Cost: ₹").append(vendorCost).append("\n");
+            summary.append("          Decoration Labor Cost: ₹").append(decorationCost).append("\n");
+            summary.append("          Vegetarian Cost (₹500): ₹").append(vegCount * 500).append("\n");
+            summary.append("          Non-Vegetarian Cost (₹800): ₹").append(nonVegCount * 800).append("\n");
+            summary.append("          Photography Package: ₹").append(photographerCost).append("\n");
+            summary.append("\n");
+            summary.append("          💰 Total Cost: ₹").append(totalCost).append("\n");
+
+            area.setText(summary.toString());
+
+            // Save summary to file
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save Summary");
+            fileChooser.setSelectedFile(new File("EventSummary.txt"));
+            int userSelection = fileChooser.showSaveDialog(this);
+
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                String filePath = file.getAbsolutePath();
+                // Ensure .txt extension
+                if (!filePath.toLowerCase().endsWith(".txt")) {
+                    filePath += ".txt";
+                    file = new File(filePath);
+                }
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                    writer.write(summary.toString());
+                    JOptionPane.showMessageDialog(this, "Summary saved to " + filePath);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
+                }
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(area);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(finish, BorderLayout.SOUTH);
+        return panel;
+    }
+
+    private boolean validateBooking() {
+        String name = nameField.getText().trim();
+        String phone = phoneField.getText().trim();
+        String email = emailField.getText().trim();
+        String date = dateField.getText().trim();
+
+        if (name.isEmpty() || phone.isEmpty() || email.isEmpty() || date.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill all fields.");
+            return false;
+        }
+        if (!phone.matches("\\d{10}")) {
+            JOptionPane.showMessageDialog(this, "Invalid phone number.");
+            return false;
+        }
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            JOptionPane.showMessageDialog(this, "Invalid email.");
+            return false;
+        }
+
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            LocalDate input = LocalDate.parse(date, formatter);
+            if (!input.isAfter(LocalDate.now())) {
+                JOptionPane.showMessageDialog(this, "Date must be in future.");
+                return false;
+            }
+            eventDate = date;
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(this, "Invalid date format.");
+            return false;
+        }
+        return true;
+    }
+
+    private int calculateVendorCost(String[] items) {
+        String[] ITEM_NAMES = {
+            "Flowers", "Balloons", "Lights", "Drapes", "Stage Setup",
+            "Table Centerpieces", "Backdrops", "Candles", "Fabric Rolls"
+        };
+        int[] ITEM_COSTS = {
+            30, 10, 200, 150, 1000,
+            250, 1200, 50, 400
+        };
+        int total = 0;
+        for (String item : items) {
+            String[] parts = item.split(" ", 2);
+            int qty = Integer.parseInt(parts[0]);
+            String name = parts[1];
+            for (int i = 0; i < ITEM_NAMES.length; i++) {
+                if (ITEM_NAMES[i].equals(name)) {
+                    total += qty * ITEM_COSTS[i];
+                    break;
+                }
+            }
+        }
+        return total;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(EventManagementGUI::new);
+    }
+}
