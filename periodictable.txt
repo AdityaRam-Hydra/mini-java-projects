@@ -1,0 +1,403 @@
+package periodictable;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+
+
+interface ElementInfo {
+    String getDetails(int atomicNumber);
+}
+
+
+class Element {
+    String name, symbol, groupType, electronicConfig, block;
+    int group, period, atomicNumber, valence;
+    double atomicWeight;
+
+    public Element(String name, String symbol, int atomicNumber, double atomicWeight, int group, int period, int valence, String electronicConfig, String groupType, String block) {
+        this.name = name;
+        this.symbol = symbol;
+        this.atomicNumber = atomicNumber;
+        this.atomicWeight = atomicWeight;
+        this.group = group;
+        this.period = period;
+        this.valence = valence;
+        this.electronicConfig = electronicConfig;
+        this.groupType = groupType;
+        this.block = block;
+    }
+
+    public String getDetails() {
+        return "Name: " + name +
+               "\nSymbol: " + symbol +
+               "\nAtomic Number: " + atomicNumber +
+               "\nAtomic Weight: " + atomicWeight +
+               "\nGroup: " + group +
+               "\nPeriod: " + period +
+               "\nValence: " + valence +
+               "\nElectronic Configuration: " + electronicConfig +
+               "\nType: " + groupType +
+               "\nBlock: " + block;
+    }
+}
+
+
+class PeriodicTableData implements ElementInfo {
+    Element[] elements = new Element[119];
+
+    public PeriodicTableData() {
+        elements[1] = new Element("Hydrogen", "H", 1, 1.008, 1, 1, 1, "1s1", "Nonmetal", "s");
+        elements[2] = new Element("Helium", "He", 2, 4.0026, 18, 1, 0, "1s2", "Noble Gas", "s");
+        elements[3] = new Element("Lithium", "Li", 3, 6.94, 1, 2, 1, "[He] 2s1", "Alkali Metal", "s");
+        elements[4] = new Element("Beryllium", "Be", 4, 9.0122, 2, 2, 2, "[He] 2s2", "Alkaline Earth Metal", "s");
+        elements[5] = new Element("Boron", "B", 5, 10.81, 13, 2, 3, "[He] 2s2 2p1", "Metalloid", "p");
+        elements[6] = new Element("Carbon", "C", 6, 12.011, 14, 2, 4, "[He] 2s2 2p2", "Nonmetal", "p");
+        elements[7] = new Element("Nitrogen", "N", 7, 14.007, 15, 2, 5, "[He] 2s2 2p3", "Nonmetal", "p");
+        elements[8] = new Element("Oxygen", "O", 8, 15.999, 16, 2, 6, "[He] 2s2 2p4", "Nonmetal", "p");
+        elements[9] = new Element("Fluorine", "F", 9, 18.998, 17, 2, 7, "[He] 2s2 2p5", "Halogen", "p");
+        elements[10] = new Element("Neon", "Ne", 10, 20.180, 18, 2, 0, "[He]  vok2s2 2p6", "Noble Gas", "p");
+        elements[11] = new Element("Sodium", "Na", 11, 22.990, 1, 3, 1, "[Ne] 3s1", "Alkali Metal", "s");
+        elements[12] = new Element("Magnesium", "Mg", 12, 24.305, 2, 3, 2, "[Ne] 3s2", "Alkaline Earth Metal", "s");
+        elements[13] = new Element("Aluminum", "Al", 13, 26.982, 13, 3, 3, "[Ne] 3s2 3p1", "Post-transition Metal", "p");
+        elements[14] = new Element("Silicon", "Si", 14, 28.085, 14, 3, 4, "[Ne] 3s2 3p2", "Metalloid", "p");
+        elements[15] = new Element("Phosphorus", "P", 15, 30.974, 15, 3, 5, "[Ne] 3s2 3p3", "Nonmetal", "p");
+        elements[16] = new Element("Sulfur", "S", 16, 32.06, 16, 3, 6, "[Ne] 3s2 3p4", "Nonmetal", "p");
+        elements[17] = new Element("Chlorine", "Cl", 17, 35.45, 17, 3, 7, "[Ne] 3s2 3p5", "Halogen", "p");
+        elements[18] = new Element("Argon", "Ar", 18, 39.948, 18, 3, 0, "[Ne] 3s2 3p6", "Noble Gas", "p");
+        elements[19] = new Element("Potassium", "K", 19, 39.098, 1, 4, 1, "[Ar] 4s1", "Alkali Metal", "s");
+        elements[20] = new Element("Calcium", "Ca", 20, 40.078, 2, 4, 2, "[Ar] 4s2", "Alkaline Earth Metal", "s");
+        elements[21] = new Element("Scandium", "Sc", 21, 44.956, 3, 4, 3, "[Ar] 3d1 4s2", "Transition Metal", "d");
+        elements[22] = new Element("Titanium", "Ti", 22, 47.867, 4, 4, 4, "[Ar] 3d2 4s2", "Transition Metal", "d");
+        elements[23] = new Element("Vanadium", "V", 23, 50.942, 5, 4, 5, "[Ar] 3d3 4s2", "Transition Metal", "d");
+        elements[24] = new Element("Chromium", "Cr", 24, 51.996, 6, 4, 6, "[Ar] 3d5 4s1", "Transition Metal", "d");
+        elements[25] = new Element("Manganese", "Mn", 25, 54.938, 7, 4, 7, "[Ar] 3d5 4s2", "Transition Metal", "d");
+        elements[26] = new Element("Iron", "Fe", 26, 55.845, 8, 4, 2, "[Ar] 3d6 4s2", "Transition Metal", "d");
+        elements[27] = new Element("Cobalt", "Co", 27, 58.933, 9, 4, 2, "[Ar] 3d7 4s2", "Transition Metal", "d");
+        elements[28] = new Element("Nickel", "Ni", 28, 58.693, 10, 4, 2, "[Ar] 3d8 4s2", "Transition Metal", "d");
+        elements[29] = new Element("Copper", "Cu", 29, 63.546, 11, 4, 1, "[Ar] 3d10 4s1", "Transition Metal", "d");
+        elements[30] = new Element("Zinc", "Zn", 30, 65.38, 12, 4, 2, "[Ar] 3d10 4s2", "Transition Metal", "d");
+        elements[31] = new Element("Gallium", "Ga", 31, 69.723, 13, 4, 3, "[Ar] 3d10 4s2 4p1", "Post-transition Metal", "p");
+        elements[32] = new Element("Germanium", "Ge", 32, 72.630, 14, 4, 4, "[Ar] 3d10 4s2 4p2", "Metalloid", "p");
+        elements[33] = new Element("Arsenic", "As", 33, 74.922, 15, 4, 5, "[Ar] 3d10 4s2 4p3", "Metalloid", "p");
+        elements[34] = new Element("Selenium", "Se", 34, 78.971, 16, 4, 6, "[Ar] 3d10 4s2 4p4", "Nonmetal", "p");
+        elements[35] = new Element("Bromine", "Br", 35, 79.904, 17, 4, 7, "[Ar] 3d10 4s2 4p5", "Halogen", "p");
+        elements[36] = new Element("Krypton", "Kr", 36, 83.798, 18, 4, 0, "[Ar] 3d10 4s2 4p6", "Noble Gas", "p");
+        elements[37] = new Element("Rubidium", "Rb", 37, 85.468, 1, 5, 1, "[Kr] 5s1", "Alkali Metal", "s");
+        elements[38] = new Element("Strontium", "Sr", 38, 87.62, 2, 5, 2, "[Kr] 5s2", "Alkaline Earth Metal", "s");
+        elements[39] = new Element("Yttrium", "Y", 39, 88.906, 3, 5, 3, "[Kr] 4d1 5s2", "Transition Metal", "d");
+        elements[40] = new Element("Zirconium", "Zr", 40, 91.224, 4, 5, 4, "[Kr] 4d2 5s2", "Transition Metal", "d");
+        elements[41] = new Element("Niobium", "Nb", 41, 92.906, 5, 5, 5, "[Kr] 4d4 5s1", "Transition Metal", "d");
+        elements[42] = new Element("Molybdenum", "Mo", 42, 95.95, 6, 5, 6, "[Kr] 4d5 5s1", "Transition Metal", "d");
+        elements[43] = new Element("Technetium", "Tc", 43, 98.0, 7, 5, 7, "[Kr] 4d5 5s2", "Transition Metal", "d");
+        elements[44] = new Element("Ruthenium", "Ru", 44, 101.07, 8, 5, 2, "[Kr] 4d7 5s1", "Transition Metal", "d");
+        elements[45] = new Element("Rhodium", "Rh", 45, 102.91, 9, 5, 2, "[Kr] 4d8 5s1", "Transition Metal", "d");
+        elements[46] = new Element("Palladium", "Pd", 46, 106.42, 10, 5, 0, "[Kr] 4d10", "Transition Metal", "d");
+        elements[47] = new Element("Silver", "Ag", 47, 107.87, 11, 5, 1, "[Kr] 4d10 5s1", "Transition Metal", "d");
+        elements[48] = new Element("Cadmium", "Cd", 48, 112.41, 12, 5, 2, "[Kr] 4d10 5s2", "Transition Metal", "d");
+        elements[49] = new Element("Indium", "In", 49, 114.82, 13, 5, 3, "[Kr] 4d10 5s2 5p1", "Post-transition Metal", "p");
+        elements[50] = new Element("Tin", "Sn", 50, 118.71, 14, 5, 4, "[Kr] 4d10 5s2 5p2", "Post-transition Metal", "p");
+        elements[51] = new Element("Antimony", "Sb", 51, 121.76, 15, 5, 5, "[Kr] 4d10 5s2 5p3", "Metalloid", "p");
+        elements[52] = new Element("Tellurium", "Te", 52, 127.60, 16, 5, 6, "[Kr] 4d10 5s2 5p4", "Metalloid", "p");
+        elements[53] = new Element("Iodine", "I", 53, 126.90, 17, 5, 7, "[Kr] 4d10 5s2 5p5", "Halogen", "p");
+        elements[54] = new Element("Xenon", "Xe", 54, 131.29, 18, 5, 0, "[Kr] 4d10 5s2 5p6", "Noble Gas", "p");
+        elements[55] = new Element("Cesium", "Cs", 55, 132.91, 1, 6, 1, "[Xe] 6s1", "Alkali Metal", "s");
+        elements[56] = new Element("Barium", "Ba", 56, 137.33, 2, 6, 2, "[Xe] 6s2", "Alkaline Earth Metal", "s");
+        elements[57] = new Element("Lanthanum", "La", 57, 138.91, 3, 6, 3, "[Xe] 5d1 6s2", "Lanthanide", "d");
+        elements[58] = new Element("Cerium", "Ce", 58, 140.12, 4, 6, 4, "[Xe] 4f1 5d1 6s2", "Lanthanide", "f");
+        elements[59] = new Element("Praseodymium", "Pr", 59, 140.91, 5, 6, 3, "[Xe] 4f3 6s2", "Lanthanide", "f");
+        elements[60] = new Element("Neodymium", "Nd", 60, 144.24, 6, 6, 3, "[Xe] 4f4 6s2", "Lanthanide", "f");
+        elements[61] = new Element("Promethium", "Pm", 61, 145.0, 7, 6, 3, "[Xe] 4f5 6s2", "Lanthanide", "f");
+        elements[62] = new Element("Samarium", "Sm", 62, 150.36, 8, 6, 3, "[Xe] 4f6 6s2", "Lanthanide", "f");
+        elements[63] = new Element("Europium", "Eu", 63, 151.96, 9, 6, 2, "[Xe] 4f7 6s2", "Lanthanide", "f");
+        elements[64] = new Element("Gadolinium", "Gd", 64, 157.25, 10, 6, 3, "[Xe] 4f7 5d1 6s2", "Lanthanide", "f");
+        elements[65] = new Element("Terbium", "Tb", 65, 158.93, 11, 6, 3, "[Xe] 4f9 6s2", "Lanthanide", "f");
+        elements[66] = new Element("Dysprosium", "Dy", 66, 162.50, 12, 6, 3, "[Xe] 4f10 6s2", "Lanthanide", "f");
+        elements[67] = new Element("Holmium", "Ho", 67, 164.93, 13, 6, 3, "[Xe] 4f11 6s2", "Lanthanide", "f");
+        elements[68] = new Element("Erbium", "Er", 68, 167.26, 14, 6, 3, "[Xe] 4f12 6s2", "Lanthanide", "f");
+        elements[69] = new Element("Thulium", "Tm", 69, 168.93, 15, 6, 3, "[Xe] 4f13 6s2", "Lanthanide", "f");
+        elements[70] = new Element("Ytterbium", "Yb", 70, 173.05, 16, 6, 2, "[Xe] 4f14 6s2", "Lanthanide", "f");
+        elements[71] = new Element("Lutetium", "Lu", 71, 174.97, 17, 6, 3, "[Xe] 4f14 5d1 6s2", "Lanthanide", "d");
+        elements[72] = new Element("Hafnium", "Hf", 72, 178.49, 4, 6, 4, "[Xe] 4f14 5d2 6s2", "Transition Metal", "d");
+        elements[73] = new Element("Tantalum", "Ta", 73, 180.95, 5, 6, 5, "[Xe] 4f14 5d3 6s2", "Transition Metal", "d");
+        elements[74] = new Element("Tungsten", "W", 74, 183.84, 6, 6, 6, "[Xe] 4f14 5d4 6s2", "Transition Metal", "d");
+        elements[75] = new Element("Rhenium", "Re", 75, 186.21, 7, 6, 7, "[Xe] 4f14 5d5 6s2", "Transition Metal", "d");
+        elements[76] = new Element("Osmium", "Os", 76, 190.23, 8, 6, 2, "[Xe] 4f14 5d6 6s2", "Transition Metal", "d");
+        elements[77] = new Element("Iridium", "Ir", 77, 192.22, 9, 6, 2, "[Xe] 4f14 5d7 6s2", "Transition Metal", "d");
+        elements[78] = new Element("Platinum", "Pt", 78, 195.08, 10, 6, 2, "[Xe] 4f14 5d9 6s1", "Transition Metal", "d");
+        elements[79] = new Element("Gold", "Au", 79, 196.97, 11, 6, 1, "[Xe] 4f14 5d10 6s1", "Transition Metal", "d");
+        elements[80] = new Element("Mercury", "Hg", 80, 200.59, 12, 6, 2, "[Xe] 4f14 5d10 6s2", "Transition Metal", "d");
+        elements[81] = new Element("Thallium", "Tl", 81, 204.38, 13, 6, 3, "[Xe] 4f14 5d10 6s2 6p1", "Post-transition Metal", "p");
+        elements[82] = new Element("Lead", "Pb", 82, 207.2, 14, 6, 4, "[Xe] 4f14 5d10 6s2 6p2", "Post-transition Metal", "p");
+        elements[83] = new Element("Bismuth", "Bi", 83, 208.98, 15, 6, 5, "[Xe] 4f14 5d10 6s2 6p3", "Post-transition Metal", "p");
+        elements[84] = new Element("Polonium", "Po", 84, 209.0, 16, 6, 6, "[Xe] 4f14 5d10 6s2 6p4", "Metalloid", "p");
+        elements[85] = new Element("Astatine", "At", 85, 210.0, 17, 6, 7, "[Xe] 4f14 5d10 6s2 6p5", "Halogen", "p");
+        elements[86] = new Element("Radon", "Rn", 86, 222.0, 18, 6, 0, "[Xe] 4f14 5d10 6s2 6p6", "Noble Gas", "p");
+        elements[87] = new Element("Francium", "Fr", 87, 223.0, 1, 7, 1, "[Rn] 7s1", "Alkali Metal", "s");
+        elements[88] = new Element("Radium", "Ra", 88, 226.0, 2, 7, 2, "[Rn] 7s2", "Alkaline Earth Metal", "s");
+        elements[89] = new Element("Actinium", "Ac", 89, 227.0, 3, 7, 3, "[Rn] 6d1 7s2", "Actinide", "d");
+        elements[90] = new Element("Thorium", "Th", 90, 232.04, 4, 7, 4, "[Rn] 6d2 7s2", "Actinide", "f");
+        elements[91] = new Element("Protactinium", "Pa", 91, 231.04, 5, 7, 5, "[Rn] 5f2 6d1 7s2", "Actinide", "f");
+        elements[92] = new Element("Uranium", "U", 92, 238.03, 6, 7, 6, "[Rn] 5f3 6d1 7s2", "Actinide", "f");
+        elements[93] = new Element("Neptunium", "Np", 93, 237.0, 7, 7, 7, "[Rn] 5f4 6d1 7s2", "Actinide", "f");
+        elements[94] = new Element("Plutonium", "Pu", 94, 244.0, 8, 7, 6, "[Rn] 5f6 7s2", "Actinide", "f");
+        elements[95] = new Element("Americium", "Am", 95, 243.0, 9, 7, 3, "[Rn] 5f7 7s2", "Actinide", "f");
+        elements[96] = new Element("Curium", "Cm", 96, 247.0, 10, 7, 3, "[Rn] 5f7 6d1 7s2", "Actinide", "f");
+        elements[97] = new Element("Berkelium", "Bk", 97, 247.0, 11, 7, 3, "[Rn] 5f9 7s2", "Actinide", "f");
+        elements[98] = new Element("Californium", "Cf", 98, 251.0, 12, 7, 3, "[Rn] 5f10 7s2", "Actinide", "f");
+        elements[99] = new Element("Einsteinium", "Es", 99, 252.0, 13, 7, 3, "[Rn] 5f11 7s2", "Actinide", "f");
+        elements[100] = new Element("Fermium", "Fm", 100, 257.0, 14, 7, 3, "[Rn] 5f12 7s2", "Actinide", "f");
+        elements[101] = new Element("Mendelevium", "Md", 101, 258.0, 15, 7, 3, "[Rn] 5f13 7s2", "Actinide", "f");
+        elements[102] = new Element("Nobelium", "No", 102, 259.0, 16, 7, 2, "[Rn] 5f14 7s2", "Actinide", "f");
+        elements[103] = new Element("Lawrencium", "Lr", 103, 262.0, 17, 7, 3, "[Rn] 5f14 6d1 7s2", "Actinide", "d");
+        elements[104] = new Element("Rutherfordium", "Rf", 104, 267.0, 4, 7, 4, "[Rn] 5f14 6d2 7s2", "Transition Metal", "d");
+        elements[105] = new Element("Dubnium", "Db", 105, 270.0, 5, 7, 5, "[Rn] 5f14 6d3 7s2", "Transition Metal", "d");
+        elements[106] = new Element("Seaborgium", "Sg", 106, 271.0, 6, 7, 6, "[Rn] 5f14 6d4 7s2", "Transition Metal", "d");
+        elements[107] = new Element("Bohrium", "Bh", 107, 270.0, 7, 7, 7, "[Rn] 5f14 6d5 7s2", "Transition Metal", "d");
+        elements[108] = new Element("Hassium", "Hs", 108, 277.0, 8, 7, 8, "[Rn] 5f14 6d6 7s2", "Transition Metal", "d");
+        elements[109] = new Element("Meitnerium", "Mt", 109, 278.0, 9, 7, 9, "[Rn] 5f14 6d7 7s2", "Transition Metal", "d");
+        elements[110] = new Element("Darmstadtium", "Ds", 110, 281.0, 10, 7, 10, "[Rn] 5f14 6d8 7s2", "Transition Metal", "d");
+        elements[111] = new Element("Roentgenium", "Rg", 111, 280.0, 11, 7, 1, "[Rn] 5f14 6d9 7s1", "Transition Metal", "d");
+        elements[112] = new Element("Copernicium", "Cn", 112, 285.0, 12, 7, 2, "[Rn] 5f14 6d10 7s2", "Transition Metal", "d");
+        elements[113] = new Element("Nihonium", "Nh", 113, 284.0, 13, 7, 3, "[Rn] 5f14 6d10 7s2 7p1", "Post-transition Metal", "p");
+        elements[114] = new Element("Flerovium", "Fl", 114, 289.0, 14, 7, 4, "[Rn] 5f14 6d10 7s2 7p2", "Post-transition Metal", "p");
+        elements[115] = new Element("Moscovium", "Mc", 115, 288.0, 15, 7, 5, "[Rn] 5f14 6d10 7s2 7p3", "Post-transition Metal", "p");
+        elements[116] = new Element("Livermorium", "Lv", 116, 293.0, 16, 7, 6, "[Rn] 5f14 6d10 7s2 7p4", "Post-transition Metal", "p");
+        elements[117] = new Element("Tennessine", "Ts", 117, 294.0, 17, 7, 7, "[Rn] 5f14 6d10 7s2 7p5", "Halogen", "p");
+        elements[118] = new Element("Oganesson", "Og", 118, 294.0, 18, 7, 0, "[Rn] 5f14 6d10 7s2 7p6", "Noble Gas", "p");
+    }
+
+
+    public String getDetails(int atomicNumber) {
+        if (atomicNumber >= 1 && atomicNumber <= 118 && elements[atomicNumber] != null) {
+            return elements[atomicNumber].getDetails();
+        } else {
+            return "Invalid element number.";
+        }
+    }
+
+    public String[] getElementOptions() {
+        String[] options = new String[118];
+        for (int i = 1; i <= 118; i++) {
+            options[i - 1] = i + " - " + (elements[i] != null ? elements[i].name : "Unknown");
+        }
+        return options;
+    }
+
+    public String[] getGroupOptions() {
+        return new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"};
+    }
+
+    public String[] getPeriodOptions() {
+        return new String[]{"1", "2", "3", "4", "5", "6", "7"};
+    }
+
+    public String[] getBlockOptions() {
+        return new String[]{"s", "p", "d", "f"};
+    }
+
+    public String[] getElementsInGroup(int group) {
+        ArrayList<String> result = new ArrayList<>();
+        for (int i = 1; i <= 118; i++) {
+            if (elements[i] != null && elements[i].group == group) {
+                result.add(i + " - " + elements[i].name);
+            }
+        }
+        return result.toArray(new String[0]);
+    }
+
+    public String[] getElementsInPeriod(int period) {
+        ArrayList<String> result = new ArrayList<>();
+        for (int i = 1; i <= 118; i++) {
+            if (elements[i] != null && elements[i].period == period) {
+                result.add(i + " - " + elements[i].name);
+            }
+        }
+        return result.toArray(new String[0]);
+    }
+
+    public String[] getElementsInBlock(String block) {
+        ArrayList<String> result = new ArrayList<>();
+        for (int i = 1; i <= 118; i++) {
+            if (elements[i] != null && elements[i].block.equalsIgnoreCase(block)) {
+                result.add(i + " - " + elements[i].name);
+            }
+        }
+        return result.toArray(new String[0]);
+    }
+}
+
+
+public class PeriodicTableGUI {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            PeriodicTableData data = new PeriodicTableData();
+
+
+            JFrame frame = new JFrame("Periodic Table Lookup Tool");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(700, 500);
+            frame.setMinimumSize(new Dimension(600, 400));
+            frame.setLayout(new BorderLayout(10, 10));
+            frame.getContentPane().setBackground(new Color(245, 245, 245)); // Light gray background
+
+
+            JPanel titlePanel = new JPanel(new BorderLayout());
+            titlePanel.setBackground(new Color(60, 60, 60)); // Dark gray header
+            JLabel titleLabel = new JLabel("Periodic Table Explorer", SwingConstants.CENTER);
+            titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+            titleLabel.setForeground(Color.WHITE);
+            titleLabel.setBorder(new EmptyBorder(10, 0, 10, 0));
+            titlePanel.add(titleLabel, BorderLayout.CENTER);
+            titlePanel.setBorder(new LineBorder(new Color(40, 40, 40), 1));
+
+  
+            JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+            inputPanel.setBackground(new Color(245, 245, 245));
+            inputPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+
+            JLabel categoryLabel = new JLabel("Category:");
+            categoryLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            String[] categories = {"Elements", "Groups", "Periods", "Blocks"};
+            JComboBox<String> categoryDropdown = new JComboBox<>(categories);
+            categoryDropdown.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            categoryDropdown.setToolTipText("Select a category to filter elements");
+            categoryDropdown.setBackground(Color.WHITE);
+            categoryDropdown.setPreferredSize(new Dimension(200, 30));
+
+
+            JLabel filterLabel = new JLabel("Filter:");
+            filterLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            JComboBox<String> filterDropdown = new JComboBox<>();
+            filterDropdown.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            filterDropdown.setToolTipText("Select a group, period, or block");
+            filterDropdown.setBackground(Color.WHITE);
+            filterDropdown.setPreferredSize(new Dimension(200, 30));
+
+
+            JLabel elementLabel = new JLabel("Element:");
+            elementLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            JComboBox<String> selectionDropdown = new JComboBox<>();
+            selectionDropdown.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            selectionDropdown.setToolTipText("Select an element to view details");
+            selectionDropdown.setBackground(Color.WHITE);
+            selectionDropdown.setPreferredSize(new Dimension(200, 30));
+
+   
+            inputPanel.add(categoryLabel);
+            inputPanel.add(categoryDropdown);
+            inputPanel.add(filterLabel);
+            inputPanel.add(filterDropdown);
+            inputPanel.add(elementLabel);
+            inputPanel.add(selectionDropdown);
+
+    
+            JTextArea displayArea = new JTextArea();
+            displayArea.setEditable(false);
+            displayArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+            displayArea.setBackground(new Color(255, 255, 255));
+            displayArea.setBorder(new LineBorder(new Color(200, 200, 200), 1));
+            displayArea.setLineWrap(true);
+            displayArea.setWrapStyleWord(true);
+            JScrollPane scrollPane = new JScrollPane(displayArea);
+            scrollPane.setBorder(new EmptyBorder(0, 10, 10, 10));
+
+
+            filterLabel.setVisible(false);
+            filterDropdown.setVisible(false);
+
+
+            categoryDropdown.addActionListener(e -> {
+                String selectedCategory = (String) categoryDropdown.getSelectedItem();
+                filterDropdown.removeAllItems();
+                selectionDropdown.removeAllItems();
+                filterLabel.setVisible(!selectedCategory.equals("Elements"));
+                filterDropdown.setVisible(!selectedCategory.equals("Elements"));
+
+                if (selectedCategory.equals("Elements")) {
+                    for (String option : data.getElementOptions()) {
+                        selectionDropdown.addItem(option);
+                    }
+                } else {
+                    String[] filterOptions = switch (selectedCategory) {
+                        case "Groups" -> data.getGroupOptions();
+                        case "Periods" -> data.getPeriodOptions();
+                        case "Blocks" -> data.getBlockOptions();
+                        default -> new String[]{};
+                    };
+                    for (String option : filterOptions) {
+                        filterDropdown.addItem(option);
+                    }
+                }
+
+                
+                if (filterDropdown.getItemCount() > 0) {
+                    filterDropdown.setSelectedIndex(0);
+                } else if (selectionDropdown.getItemCount() > 0) {
+                    selectionDropdown.setSelectedIndex(0);
+                } else {
+                    displayArea.setText("No elements available.");
+                }
+            });
+
+            
+            filterDropdown.addActionListener(e -> {
+                String selectedCategory = (String) categoryDropdown.getSelectedItem();
+                String selectedFilter = (String) filterDropdown.getSelectedItem();
+                selectionDropdown.removeAllItems();
+
+                if (selectedFilter == null) return;
+
+                String[] elementOptions = switch (selectedCategory) {
+                    case "Groups" -> data.getElementsInGroup(Integer.parseInt(selectedFilter));
+                    case "Periods" -> data.getElementsInPeriod(Integer.parseInt(selectedFilter));
+                    case "Blocks" -> data.getElementsInBlock(selectedFilter);
+                    default -> new String[]{};
+                };
+
+                for (String option : elementOptions) {
+                    selectionDropdown.addItem(option);
+                }
+
+
+                if (selectionDropdown.getItemCount() > 0) {
+                    selectionDropdown.setSelectedIndex(0);
+                } else {
+                    displayArea.setText("No elements found for " + selectedCategory.toLowerCase() + " " + selectedFilter);
+                }
+            });
+
+     
+            selectionDropdown.addActionListener(e -> {
+                String selectedItem = (String) selectionDropdown.getSelectedItem();
+                if (selectedItem == null) return;
+
+
+                try {
+                    int atomicNumber = Integer.parseInt(selectedItem.split(" - ")[0]);
+                    displayArea.setText(data.getDetails(atomicNumber));
+                } catch (NumberFormatException ex) {
+                    displayArea.setText("Error selecting element.");
+                }
+            });
+
+            
+            for (String option : data.getElementOptions()) {
+                selectionDropdown.addItem(option);
+            }
+            displayArea.setText(data.getDetails(1));
+
+  
+            frame.add(titlePanel, BorderLayout.NORTH);
+            frame.add(inputPanel, BorderLayout.CENTER);
+            frame.add(scrollPane, BorderLayout.SOUTH);
+
+
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+}
