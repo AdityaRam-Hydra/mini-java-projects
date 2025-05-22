@@ -1,0 +1,429 @@
+package zoo;
+import javax.swing.*;
+import java.awt.*;
+import java.util.List; // Explicit import for java.util.List
+import java.util.ArrayList; // Explicit import for java.util.ArrayList
+
+
+abstract class Animal {
+    private String name;
+    private int age;
+    private String species;
+
+    public Animal(String name, int age, String species) {
+        this.name = name;
+        this.age = age;
+        this.species = species;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+    public String getSpecies() { return species; }
+
+    public void setName(String name) { this.name = name; }
+    public void setAge(int age) { this.age = age; }
+    public void setSpecies(String species) { this.species = species; }
+
+    public abstract void makeSound();
+    public abstract String displayInfo();
+}
+
+
+class Mammal extends Animal {
+    private boolean hasFur;
+
+    public Mammal(String name, int age, String species, boolean hasFur) {
+        super(name, age, species);
+        this.hasFur = hasFur;
+    }
+
+    public void makeSound() {
+        System.out.println(getName() + " the " + getSpecies() + " makes a mammal sound!");
+    }
+
+    public String displayInfo() {
+        return "Mammal - Name: " + getName() + ", Age: " + getAge() + ", Species: " + getSpecies() + ", Has Fur: " + hasFur;
+    }
+}
+
+
+class Bird extends Animal {
+    private boolean canFly;
+
+    public Bird(String name, int age, String species, boolean canFly) {
+        super(name, age, species);
+        this.canFly = canFly;
+    }
+
+    public void makeSound() {
+        System.out.println(getName() + " the " + getSpecies() + " chirps!");
+    }
+
+    public String displayInfo() {
+        return "Bird - Name: " + getName() + ", Age: " + getAge() + ", Species: " + getSpecies() + ", Can Fly: " + canFly;
+    }
+}
+
+
+class Reptile extends Animal {
+    private boolean isVenomous;
+
+    public Reptile(String name, int age, String species, boolean isVenomous) {
+        super(name, age, species);
+        this.isVenomous = isVenomous;
+    }
+
+    public void makeSound() {
+        System.out.println(getName() + " the " + getSpecies() + " hisses!");
+    }
+
+    public String displayInfo() {
+        return "Reptile - Name: " + getName() + ", Age: " + getAge() + ", Species: " + getSpecies() + ", Venomous: " + isVenomous;
+    }
+}
+
+class Zookeeper {
+    private String id;
+    private String name;
+    private List<Animal> assignedAnimals;
+
+    public Zookeeper(String id, String name) {
+        this.id = id;
+        this.name = name;
+        this.assignedAnimals = new ArrayList<>();
+    }
+
+    public String getId() { return id; }
+    public String getName() { return name; }
+
+    public void assignAnimal(Animal animal) {
+        assignedAnimals.add(animal);
+    }
+
+    public String performDuty() {
+        if (assignedAnimals.isEmpty()) {
+            return name + " has no animals assigned.";
+        }
+        StringBuilder duty = new StringBuilder(name + " is performing duties:\n");
+        for (Animal animal : assignedAnimals) {
+            duty.append(" - Feeding and checking health of ").append(animal.getName()).append(" (").append(animal.getSpecies()).append(")\n");
+        }
+        return duty.toString();
+    }
+}
+
+
+class Zoo {
+    private List<Animal> animals;
+    private List<Zookeeper> zookeepers;
+
+    public Zoo() {
+        animals = new ArrayList<>();
+        zookeepers = new ArrayList<>();
+    }
+
+    public String addAnimal(Animal animal) {
+        animals.add(animal);
+        return "Added " + animal.getName() + " to the zoo.";
+    }
+
+    public String addZookeeper(Zookeeper zookeeper) {
+        zookeepers.add(zookeeper);
+        return "Added Zookeeper: " + zookeeper.getName();
+    }
+
+    public String assignAnimalToZookeeper(String animalName, String zookeeperId) {
+        Animal animal = null;
+        for (Animal a : animals) {
+            if (a.getName().equalsIgnoreCase(animalName)) {
+                animal = a;
+                break;
+            }
+        }
+        Zookeeper zookeeper = null;
+        for (Zookeeper z : zookeepers) {
+            if (z.getId().equals(zookeeperId)) {
+                zookeeper = z;
+                break;
+            }
+        }
+        if (animal != null && zookeeper != null) {
+            zookeeper.assignAnimal(animal);
+            return "Assigned " + animal.getName() + " to " + zookeeper.getName();
+        }
+        return "Error: Animal or Zookeeper not found!";
+    }
+
+    public String displayAllAnimals() {
+        if (animals.isEmpty()) {
+            return "No animals in the zoo.";
+        }
+        StringBuilder result = new StringBuilder("Zoo Animals:\n");
+        for (Animal a : animals) {
+            result.append(a.displayInfo()).append("\n");
+        }
+        return result.toString();
+    }
+
+    public String makeAllSounds() {
+        if (animals.isEmpty()) {
+            return "No animals to make sounds!";
+        }
+        StringBuilder result = new StringBuilder("Animal Sounds:\n");
+        for (Animal a : animals) {
+            a.makeSound();
+            result.append(a.getName()).append(" the ").append(a.getSpecies()).append(" makes a sound.\n");
+        }
+        return result.toString();
+    }
+
+    public String searchAnimalByName(String name) {
+        boolean found = false;
+        StringBuilder result = new StringBuilder("Search Results for \"" + name + "\":\n");
+        for (Animal a : animals) {
+            if (a.getName().equalsIgnoreCase(name)) {
+                result.append(a.displayInfo()).append("\n");
+                found = true;
+            }
+        }
+        if (!found) {
+            result.append("No animals with the name \"").append(name).append("\" found.");
+        }
+        return result.toString();
+    }
+
+    public String performDailyDuties() {
+        if (zookeepers.isEmpty()) {
+            return "No zookeepers available.";
+        }
+        StringBuilder result = new StringBuilder("Daily Duties:\n");
+        for (Zookeeper z : zookeepers) {
+            result.append(z.performDuty()).append("\n");
+        }
+        return result.toString();
+    }
+}
+
+
+class ZooManagementGUI extends JFrame {
+    private Zoo zoo;
+    private JTextArea outputArea;
+    private JTextField animalNameField, animalAgeField, animalSpeciesField, mammalFurField, birdFlyField, reptileVenomousField;
+    private JTextField zookeeperIdField, zookeeperNameField, assignAnimalNameField, assignZookeeperIdField, searchNameField;
+
+    public ZooManagementGUI() {
+        zoo = new Zoo();
+        setTitle("Zoo Management System");
+        setSize(700, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        // Output area
+        outputArea = new JTextArea(20, 50);
+        outputArea.setEditable(false);
+        add(new JScrollPane(outputArea), BorderLayout.CENTER);
+
+        // Input panel
+        JPanel inputPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+
+        // Add Animal
+        inputPanel.add(new JLabel("Animal Name:"));
+        animalNameField = new JTextField();
+        inputPanel.add(animalNameField);
+
+        inputPanel.add(new JLabel("Age:"));
+        animalAgeField = new JTextField();
+        inputPanel.add(animalAgeField);
+
+        inputPanel.add(new JLabel("Species:"));
+        animalSpeciesField = new JTextField();
+        inputPanel.add(animalSpeciesField);
+
+        inputPanel.add(new JLabel("Mammal Has Fur (true/false):"));
+        mammalFurField = new JTextField();
+        inputPanel.add(mammalFurField);
+
+        inputPanel.add(new JLabel("Bird Can Fly (true/false):"));
+        birdFlyField = new JTextField();
+        inputPanel.add(birdFlyField);
+
+        inputPanel.add(new JLabel("Reptile Venomous (true/false):"));
+        reptileVenomousField = new JTextField();
+        inputPanel.add(reptileVenomousField);
+
+        JButton addMammalButton = new JButton("Add Mammal");
+        addMammalButton.addActionListener(e -> addMammal());
+        inputPanel.add(addMammalButton);
+
+        JButton addBirdButton = new JButton("Add Bird");
+        addBirdButton.addActionListener(e -> addBird());
+        inputPanel.add(addBirdButton);
+
+        JButton addReptileButton = new JButton("Add Reptile");
+        addReptileButton.addActionListener(e -> addReptile());
+        inputPanel.add(addReptileButton);
+
+        // Add Zookeeper
+        inputPanel.add(new JLabel("Zookeeper ID:"));
+        zookeeperIdField = new JTextField();
+        inputPanel.add(zookeeperIdField);
+
+        inputPanel.add(new JLabel("Zookeeper Name:"));
+        zookeeperNameField = new JTextField();
+        inputPanel.add(zookeeperNameField);
+
+        JButton addZookeeperButton = new JButton("Add Zookeeper");
+        addZookeeperButton.addActionListener(e -> addZookeeper());
+        inputPanel.add(addZookeeperButton);
+
+        // Assign Animal
+        inputPanel.add(new JLabel("Animal Name (Assign):"));
+        assignAnimalNameField = new JTextField();
+        inputPanel.add(assignAnimalNameField);
+
+        inputPanel.add(new JLabel("Zookeeper ID (Assign):"));
+        assignZookeeperIdField = new JTextField();
+        inputPanel.add(assignZookeeperIdField);
+
+        JButton assignButton = new JButton("Assign Animal");
+        assignButton.addActionListener(e -> assignAnimal());
+        inputPanel.add(assignButton);
+
+        // Other Actions
+        inputPanel.add(new JLabel("Search Animal Name:"));
+        searchNameField = new JTextField();
+        inputPanel.add(searchNameField);
+
+        JButton searchButton = new JButton("Search Animal");
+        searchButton.addActionListener(e -> searchAnimal());
+        inputPanel.add(searchButton);
+
+        JButton displayButton = new JButton("Show Animals");
+        displayButton.addActionListener(e -> outputArea.setText(zoo.displayAllAnimals()));
+        inputPanel.add(displayButton);
+
+        JButton soundsButton = new JButton("Make Sounds");
+        soundsButton.addActionListener(e -> outputArea.setText(zoo.makeAllSounds()));
+        inputPanel.add(soundsButton);
+
+        JButton dutiesButton = new JButton("Daily Duties");
+        dutiesButton.addActionListener(e -> outputArea.setText(zoo.performDailyDuties()));
+        inputPanel.add(dutiesButton);
+
+        add(inputPanel, BorderLayout.NORTH);
+    }
+
+    private void addMammal() {
+        try {
+            String name = animalNameField.getText();
+            int age = Integer.parseInt(animalAgeField.getText());
+            String species = animalSpeciesField.getText();
+            boolean hasFur = Boolean.parseBoolean(mammalFurField.getText());
+
+            if (name.isEmpty() || species.isEmpty()) {
+                outputArea.setText("Error: Name and species required!");
+                return;
+            }
+
+            Animal animal = new Mammal(name, age, species, hasFur);
+            outputArea.setText(zoo.addAnimal(animal));
+            clearAnimalFields();
+        } catch (NumberFormatException e) {
+            outputArea.setText("Error: Invalid age format!");
+        }
+    }
+
+    private void addBird() {
+        try {
+            String name = animalNameField.getText();
+            int age = Integer.parseInt(animalAgeField.getText());
+            String species = animalSpeciesField.getText();
+            boolean canFly = Boolean.parseBoolean(birdFlyField.getText());
+
+            if (name.isEmpty() || species.isEmpty()) {
+                outputArea.setText("Error: Name and species required!");
+                return;
+            }
+
+            Animal animal = new Bird(name, age, species, canFly);
+            outputArea.setText(zoo.addAnimal(animal));
+            clearAnimalFields();
+        } catch (NumberFormatException e) {
+            outputArea.setText("Error: Invalid age format!");
+        }
+    }
+
+    private void addReptile() {
+        try {
+            String name = animalNameField.getText();
+            int age = Integer.parseInt(animalAgeField.getText());
+            String species = animalSpeciesField.getText();
+            boolean isVenomous = Boolean.parseBoolean(reptileVenomousField.getText());
+
+            if (name.isEmpty() || species.isEmpty()) {
+                outputArea.setText("Error: Name and species required!");
+                return;
+            }
+
+            Animal animal = new Reptile(name, age, species, isVenomous);
+            outputArea.setText(zoo.addAnimal(animal));
+            clearAnimalFields();
+        } catch (NumberFormatException e) {
+            outputArea.setText("Error: Invalid age format!");
+        }
+    }
+
+    private void addZookeeper() {
+        String id = zookeeperIdField.getText();
+        String name = zookeeperNameField.getText();
+        if (id.isEmpty() || name.isEmpty()) {
+            outputArea.setText("Error: Zookeeper ID and name required!");
+            return;
+        }
+        Zookeeper zookeeper = new Zookeeper(id, name);
+        outputArea.setText(zoo.addZookeeper(zookeeper));
+        zookeeperIdField.setText("");
+        zookeeperNameField.setText("");
+    }
+
+    private void assignAnimal() {
+        String animalName = assignAnimalNameField.getText();
+        String zookeeperId = assignZookeeperIdField.getText();
+        if (animalName.isEmpty() || zookeeperId.isEmpty()) {
+            outputArea.setText("Error: Animal name and zookeeper ID required!");
+            return;
+        }
+        outputArea.setText(zoo.assignAnimalToZookeeper(animalName, zookeeperId));
+        assignAnimalNameField.setText("");
+        assignZookeeperIdField.setText("");
+    }
+
+    private void searchAnimal() {
+        String name = searchNameField.getText();
+        if (name.isEmpty()) {
+            outputArea.setText("Error: Search name required!");
+            return;
+        }
+        outputArea.setText(zoo.searchAnimalByName(name));
+        searchNameField.setText("");
+    }
+
+    private void clearAnimalFields() {
+        animalNameField.setText("");
+        animalAgeField.setText("");
+        animalSpeciesField.setText("");
+        mammalFurField.setText("");
+        birdFlyField.setText("");
+        reptileVenomousField.setText("");
+    }
+}
+
+
+public class ZooManagementWithGUI {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new ZooManagementGUI().setVisible(true);
+        });
+    }
+}
