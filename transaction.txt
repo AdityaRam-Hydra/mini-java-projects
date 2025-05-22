@@ -1,0 +1,402 @@
+package transaction;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+public class PersonalFinanceTracker extends JFrame {
+    private JTabbedPane tabbedPane;
+
+    public PersonalFinanceTracker() {
+        setTitle("Personal Finance Tracker");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout(10, 10));
+
+        tabbedPane = new JTabbedPane();
+        add(tabbedPane, BorderLayout.CENTER);
+
+        addPerson("Default");
+
+        JPanel addPersonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton addPersonButton = new JButton("Add Person");
+        addPersonButton.addActionListener(e -> {
+            String personName = JOptionPane.showInputDialog(this, "Enter person's name:");
+            if (personName != null && !personName.trim().isEmpty()) {
+                addPerson(personName);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Person name cannot be empty",
+                        "Input Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        addPersonPanel.add(addPersonButton);
+
+        JButton deletePersonButton = new JButton("Delete Person");
+        deletePersonButton.addActionListener(e -> deleteSelectedPerson());
+        addPersonPanel.add(deletePersonButton);
+
+        JButton exportTextButton = new JButton("Export to Text");
+        exportTextButton.addActionListener(e -> exportToText());
+        addPersonPanel.add(exportTextButton);
+
+        add(addPersonPanel, BorderLayout.NORTH);
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                saveTransactions();
+            }
+        });
+    }
+
+    private void addPerson(String personName) {
+        PersonPanel personPanel = new PersonPanel(personName);
+        tabbedPane.addTab(personName, personPanel);
+    }
+
+    private void deleteSelectedPerson() {
+        int selectedIndex = tabbedPane.getSelectedIndex();
+        if (selectedIndex != -1) {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to delete this person?",
+                    "Confirm Deletion",
+                    JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                tabbedPane.removeTabAt(selectedIndex);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No person selected to delete.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void exportToText() {
+        if (tabbedPane.getTabCount() == 0) {
+            JOptionPane.showMessageDialog(this, "No persons to export.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save Text File");
+        fileChooser.setSelectedFile(new File("all_transactions.txt"));
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            try (PrintWriter writer = new PrintWriter(new FileWriter(fileToSave))) {
+                writer.println("Transaction Report for All Persons");
+                writer.println("=================================");
+
+                for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+                    PersonPanel personPanel = (PersonPanel) tabbedPane.getComponentAt(i);
+                    writer.println("\nPerson: " + personPanel.getPersonName());
+                    writer.println("--------------------------------");
+
+                    for (Transaction t : personPanel.getTransactions()) {
+                        writer.printf("Date: %s, Type: %s, Amount: %.2f, Category: %s, Description: %s%n",
+                                t.date, t.type, t.amount, t.category, t.description);
+                    }
+
+                    writer.println("--------------------------------");
+                    double income = 0, expenses = 0;
+                    for (Transaction t : personPanel.getTransactions()) {
+                        if (t.type.equals("Income")) income += t.amount;
+                        else expenses += t.amount;
+                    }
+                    writer.printf("Total Income: %.2f%n", income);
+                    writer.printf("Total Expenses: %.2f%n", expenses);
+                    writer.printf("Balance: %.2f%n", income - expenses);
+                }
+
+                JOptionPane.showMessageDialog(this, "Text file exported successfully to " + fileToSave.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error exporting text file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    private void saveTransactions() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("transactions.txt"))) {
+            for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+                PersonPanel personPanel = (PersonPanel) tabbedPane.getComponentAt(i);
+                writer.println("Person:" + personPanel.getPersonName());
+                for (Transaction t : personPanel.getTransactions()) {
+                    writer.println(t.toString());
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadTransactions() {
+        File file = new File("transactions.txt");
+        if (!file.exists()) return;
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            PersonPanel currentPersonPanel = null;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("Person:")) {
+                    String personName = line.substring(7);
+                    currentPersonPanel = new PersonPanel(personName);
+                    tabbedPane.addTab(personName, currentPersonPanel);
+                } else if (currentPersonPanel != null) {
+                    currentPersonPanel.addTransaction(Transaction.fromString(line));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static class PersonPanel extends JPanel {
+        private String personName;
+        private ArrayList<Transaction> transactions;
+        private DefaultTableModel tableModel;
+        private JLabel balanceLabel, incomeLabel, expenseLabel;
+        private JTextField amountField, descriptionField;
+        private JComboBox<String> typeComboBox, categoryComboBox;
+        private JTable transactionTable;
+        private final String[] incomeCategories = {"Salary", "Business", "Investments", "Freelance", "Rental", "Other"};
+        private final String[] expenseCategories = {"Bills", "Groceries", "Rent", "Transportation", "Entertainment", "Healthcare", "Other"};
+
+        public PersonPanel(String personName) {
+            this.personName = personName;
+            this.transactions = new ArrayList<>();
+            setLayout(new BorderLayout(10, 10));
+
+            JPanel inputPanel = new JPanel(new GridLayout(6, 2, 5, 5));
+            inputPanel.add(new JLabel("Amount:"));
+            amountField = new JTextField();
+            inputPanel.add(amountField);
+
+            inputPanel.add(new JLabel("Type:"));
+            typeComboBox = new JComboBox<>(new String[]{"Income", "Expense"});
+            inputPanel.add(typeComboBox);
+
+            inputPanel.add(new JLabel("Category:"));
+            categoryComboBox = new JComboBox<>(incomeCategories);
+            inputPanel.add(categoryComboBox);
+
+            inputPanel.add(new JLabel("Description:"));
+            descriptionField = new JTextField();
+            inputPanel.add(descriptionField);
+
+            JButton addButton = new JButton("Add Transaction");
+            addButton.addActionListener(new AddTransactionListener());
+            inputPanel.add(addButton);
+
+            JButton deleteButton = new JButton("Delete Transaction");
+            deleteButton.addActionListener(e -> deleteSelectedTransaction());
+            inputPanel.add(deleteButton);
+
+            JButton editButton = new JButton("Edit Transaction");
+            editButton.addActionListener(e -> editSelectedTransaction());
+            inputPanel.add(editButton);
+
+            typeComboBox.addActionListener(e -> updateCategoryComboBox());
+
+            add(inputPanel, BorderLayout.NORTH);
+
+            String[] columns = {"Date", "Type", "Amount", "Category", "Description"};
+            tableModel = new DefaultTableModel(columns, 0);
+            transactionTable = new JTable(tableModel);
+            add(new JScrollPane(transactionTable), BorderLayout.CENTER);
+
+            JPanel summaryPanel = new JPanel(new GridLayout(3, 1));
+            incomeLabel = new JLabel("Total Income: $0.00");
+            expenseLabel = new JLabel("Total Expenses: $0.00");
+            balanceLabel = new JLabel("Balance: $0.00");
+            summaryPanel.add(incomeLabel);
+            summaryPanel.add(expenseLabel);
+            summaryPanel.add(balanceLabel);
+            add(summaryPanel, BorderLayout.SOUTH);
+        }
+
+        private void updateCategoryComboBox() {
+            String selectedType = (String) typeComboBox.getSelectedItem();
+            categoryComboBox.removeAllItems();
+            String[] categories = selectedType.equals("Income") ? incomeCategories : expenseCategories;
+            for (String category : categories) {
+                categoryComboBox.addItem(category);
+            }
+        }
+
+        public String getPersonName() {
+            return personName;
+        }
+
+        public ArrayList<Transaction> getTransactions() {
+            return transactions;
+        }
+
+        public void addTransaction(Transaction transaction) {
+            transactions.add(transaction);
+            updateTable();
+            updateSummary();
+        }
+
+        private void deleteSelectedTransaction() {
+            int selectedRow = transactionTable.getSelectedRow();
+            if (selectedRow != -1) {
+                transactions.remove(selectedRow);
+                updateTable();
+                updateSummary();
+            } else {
+                JOptionPane.showMessageDialog(this, "No transaction selected to delete.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        private void editSelectedTransaction() {
+            int selectedRow = transactionTable.getSelectedRow();
+            if (selectedRow != -1) {
+                Transaction transaction = transactions.get(selectedRow);
+                amountField.setText(String.valueOf(transaction.amount));
+                typeComboBox.setSelectedItem(transaction.type);
+                updateCategoryComboBox();
+                categoryComboBox.setSelectedItem(transaction.category);
+                descriptionField.setText(transaction.description);
+
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "Do you want to save changes to this transaction?",
+                        "Confirm Edit",
+                        JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    try {
+                        String amountText = amountField.getText().trim();
+                        if (amountText.isEmpty()) {
+                            throw new IllegalArgumentException("Amount cannot be empty");
+                        }
+                        double amount = Double.parseDouble(amountText);
+                        if (amount <= 0) throw new NumberFormatException("Amount must be positive");
+                        String type = (String) typeComboBox.getSelectedItem();
+                        String category = (String) categoryComboBox.getSelectedItem();
+                        String description = descriptionField.getText().trim();
+                        if (description.isEmpty()) {
+                            throw new IllegalArgumentException("Description cannot be empty");
+                        }
+                        String date = transaction.date;
+
+                        transactions.set(selectedRow, new Transaction(date, type, amount, category, description));
+                        updateTable();
+                        updateSummary();
+                        clearInputs();
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(this,
+                                ex.getMessage().equals("Amount must be positive") ?
+                                "Please enter a valid positive amount" :
+                                "Please enter a valid number for amount",
+                                "Input Error", JOptionPane.ERROR_MESSAGE);
+                    } catch (IllegalArgumentException ex) {
+                        JOptionPane.showMessageDialog(this,
+                                ex.getMessage(),
+                                "Input Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "No transaction selected to edit.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        private class AddTransactionListener implements ActionListener {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String amountText = amountField.getText().trim();
+                    if (amountText.isEmpty()) {
+                        throw new IllegalArgumentException("Amount cannot be empty");
+                    }
+                    double amount = Double.parseDouble(amountText);
+                    if (amount <= 0) throw new NumberFormatException("Amount must be positive");
+                    String type = (String) typeComboBox.getSelectedItem();
+                    String category = (String) categoryComboBox.getSelectedItem();
+                    String description = descriptionField.getText().trim();
+                    if (description.isEmpty()) {
+                        throw new IllegalArgumentException("Description cannot be empty");
+                    }
+                    String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
+                    Transaction transaction = new Transaction(date, type, amount, category, description);
+                    addTransaction(transaction);
+
+                    clearInputs();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(PersonPanel.this,
+                            ex.getMessage().equals("Amount must be positive") ?
+                            "Please enter a valid positive amount" :
+                            "Please enter a valid number for amount",
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(PersonPanel.this,
+                            ex.getMessage(),
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+
+        private void updateTable() {
+            tableModel.setRowCount(0);
+            for (Transaction t : transactions) {
+                tableModel.addRow(new Object[]{t.date, t.type, String.format("%.2f", t.amount), t.category, t.description});
+            }
+        }
+
+        private void updateSummary() {
+            double income = 0, expenses = 0;
+            for (Transaction t : transactions) {
+                if (t.type.equals("Income")) income += t.amount;
+                else expenses += t.amount;
+            }
+            incomeLabel.setText(String.format("Total Income: $%.2f", income));
+            expenseLabel.setText(String.format("Total Expenses: $%.2f", expenses));
+            balanceLabel.setText(String.format("Balance: $%.2f", income - expenses));
+        }
+
+        private void clearInputs() {
+            amountField.setText("");
+            descriptionField.setText("");
+            typeComboBox.setSelectedIndex(0);
+            updateCategoryComboBox();
+        }
+    }
+
+    private static class Transaction {
+        String date, type, category, description;
+        double amount;
+
+        Transaction(String date, String type, double amount, String category, String description) {
+            this.date = date;
+            this.type = type;
+            this.amount = amount;
+            this.category = category;
+            this.description = description;
+        }
+
+        
+        public String toString() {
+            return date + "," + type + "," + amount + "," + category + "," + description;
+        }
+
+        static Transaction fromString(String line) {
+            String[] parts = line.split(",", 5);
+            return new Transaction(parts[0], parts[1], Double.parseDouble(parts[2]), parts[3], parts[4]);
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            PersonalFinanceTracker tracker = new PersonalFinanceTracker();
+            tracker.loadTransactions();
+            tracker.setVisible(true);
+        });
+    }
+}
